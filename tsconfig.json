@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "module": "system",
+        "target": "es5",
+        "outDir": "dist/js",
+        "rootDir": "src/ts",
+        "sourceMap": true,
+        "downlevelIteration": true
+    }
+}

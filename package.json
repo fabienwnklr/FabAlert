@@ -1,0 +1,17 @@
+{
+  "name": "fab-alert",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.0.2"
+  },
+  "scripts": {
+    "dev": "yarn tsc --watch",
+    "prod": "npx tsc && uglifyjs dist/js/FabAlert.js -m -o dist/js/fabalert.min.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
