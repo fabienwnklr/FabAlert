@@ -1,5 +1,5 @@
 interface FabAlertOptions {
-    id?: string | number;
+    id?: string;
     type?: string;
     class?: string;
     title?: string;
@@ -60,9 +60,36 @@ const defaultOptions: FabAlertOptions = {
     onClosing: function () { },
     onClosed: function () { },
 }
+
+const log = (msg) => console.log(msg);
 class FabAlert {
+    /**
+     * @var options cf : FabAlertOptions interface l.1
+     */
     options: FabAlertOptions;
+    /**
+     * @var $el Alert element 
+     */
     $el: HTMLElement;
+    /**
+     * @var $elTitle Title element of alert
+     */
+    $elTitle: HTMLElement;
+    /**
+     * @var $elBody Element body of alert
+     */
+    $elBody: HTMLElement;
+    /**
+     * @var $elMsg Element message of alert
+     */
+    $elMsg: HTMLElement;
+    /**
+     * @var $elClose Element close of alert
+     */
+    $elClose: HTMLElement;
+    /**
+     * @var $body window body element
+     */
     $body: HTMLElement;
     /**
      * 
@@ -72,53 +99,76 @@ class FabAlert {
         this.options = { ...defaultOptions, ...options };
         this.$body = document.querySelector('body');
 
-        this.createAlert();
-        console.log('Constructed');
+        this.init();
     }
 
     /** @utils private utils function */
 
     /** @utils end of utils function */
     init() {
-        console.log('Init');
+        this.createAlert();
+        this.initEvents();
     }
 
     /**
      * Function for create node element of alert
      */
     createAlert() {
-        let alert = document.createElement('div');
-        alert.className = 'fab-alert';
+        this.$el = document.createElement('div');
+        this.$el.className = 'fab-alert';
+        this.$el.id = this.options.id;
         if (this.options && this.options.class) {
-            alert.classList.add(this.options.class);
+            this.$el.classList.add(this.options.class);
         }
 
-        let body = document.createElement('div');
-        body.className = 'fab-alert-body';
-        alert.appendChild(body);
+        this.$elBody = document.createElement('div');
+        this.$elBody.className = 'fab-alert-body';
+        this.$el.appendChild(this.$elBody);
 
         if (this.options.title && this.options.title !== undefined && this.options.title !== null) {
-            let title = document.createElement('strong');
-            title.className = 'fab-alert-title';
-            title.innerHTML = this.options.title;
-            body.appendChild(title);
+            this.$elTitle = document.createElement('strong');
+            this.$elTitle.className = 'fab-alert-title';
+            this.$elTitle.innerHTML = this.options.title;
+            this.$elBody.appendChild(this.$elTitle);
         }
 
         if (this.options.message && this.options.message !== undefined && this.options.message !== null) {
-            let message = document.createElement('p');
-            message.className = 'fab-alert-message';
-            message.innerHTML = this.options.message;
-            body.appendChild(message);
+            this.$elMsg = document.createElement('p');
+            this.$elMsg.className = 'fab-alert-message';
+            this.$elMsg.innerHTML = this.options.message;
+            this.$elBody.appendChild(this.$elMsg);
         }
 
         if (this.options.close && this.options.close !== undefined && this.options.close !== null) {
-            let close = document.createElement('button');
-            close.className = 'fab-alert-close';
-            body.appendChild(close);
+            this.$elClose = document.createElement('button');
+            this.$elClose.className = 'fab-alert-close';
+            this.$elClose.title = 'Close';
+            this.$el.appendChild(this.$elClose);
         }
 
-        this.$body.appendChild(alert);
-
-        this.$el = alert
+        this.$body.appendChild(this.$el);
     }
+
+    /**
+     * All event handler
+     */
+    initEvents() {
+        // this.$elClose.removeEventListener('click', this.close.bind(this));
+        this.$elClose.addEventListener('click', this.close.bind(this));
+    }
+
+    close() {
+        if (window.event) {
+            const event = window.event;
+
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        if (this.options.onClosing && typeof this.options.onClosing === 'function') {
+            this.options.onClosing(this);
+        }
+        
+        this.$el.remove();
+    }
+
 }

@@ -9,7 +9,8 @@
     "typescript": "^4.0.2"
   },
   "scripts": {
-    "dev": "yarn tsc --watch && sass --watch src/scss/style.scss:dist/css/style.css",
+    "dev": "yarn tsc --watch",
+    "style": "sass --watch src/scss/style.scss:dist/css/style.css",
     "prod": "npx tsc && uglifyjs dist/js/FabAlert.js -m -o dist/js/fabalert.min.js && sass src/scss/style.scss:dist/css/style.css dist/css/style.css:dist/css/style.min.css --style compressed --scss",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

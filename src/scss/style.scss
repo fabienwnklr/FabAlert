@@ -10,7 +10,6 @@
     z-index: 99999;
     bottom: 5px;
     position: fixed;
-    pointer-events: none;
     display: flex;
     flex-direction: column;
     background: rgba(71, 175, 97, 0.9);
@@ -22,14 +21,25 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        padding: .4rem;
     }
 
     .fab-alert-close {
-        width: 10px;
+        position: absolute;
+        right: 10px;
+        top: 33%;
+        cursor: pointer;
+        outline: none;
+        opacity: .5;
+        width: 25px;
         height: auto;
-        background-color: unset;
         border: none;
-        color: unset;
+        background-color: unset;
+        transition: opacity .3s ease;
+
+        &:hover {
+            opacity: 1;
+        }
 
         &::before {
             transform: rotate(45deg);

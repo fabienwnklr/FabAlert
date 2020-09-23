@@ -12,13 +12,16 @@
 <body>
     <style>
         body {
+            margin: 0;
             height: 100vh;
             background-color: #E2E2E2;
         }
     </style>
     <script >
         document.addEventListener('DOMContentLoaded', function () {
-            window.fabAlert = new FabAlert();
+            window.fabAlert = new FabAlert({
+                message: 'Alert success'
+            });
         })
     </script>
 </body>
