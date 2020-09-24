@@ -153,8 +153,11 @@ class FabAlert {
      * All event handler
      */
     initEvents() {
-        // this.$elClose.removeEventListener('click', this.close.bind(this));
-        this.$elClose.addEventListener('click', this.close.bind(this));
+        // Close event
+        this.$elClose.addEventListener('click', this.close, true);
+        this.$elClose.removeEventListener('click', this.close.bind(this), true);
+
+        
     }
 
     close() {
@@ -169,6 +172,10 @@ class FabAlert {
         }
         
         this.$el.remove();
+
+        if (this.options.onClosed && typeof this.options.onClosed === 'function') {
+            this.options.onClosed(this);
+        }
     }
 
 }
