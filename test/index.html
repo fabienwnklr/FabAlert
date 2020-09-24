@@ -15,13 +15,15 @@
             margin: 0;
             height: 100vh;
             background-color: #E2E2E2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
+    <h1>Click on document for open alert :D</h1>
     <script >
-        document.addEventListener('DOMContentLoaded', function () {
-            window.fabAlert = new FabAlert({
-                message: 'Alert success'
-            });
+        document.addEventListener('click', function () {
+            window.fabAlert = new FabAlert();
         })
     </script>
 </body>
