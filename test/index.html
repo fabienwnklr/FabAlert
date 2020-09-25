@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FabAlert</title>
     <link rel="stylesheet" href="../dist/css/style.css">
-    <script src="../dist/js/FabAlert.js" ></script>
+    <script src="../dist/js/FabAlert.js"></script>
 </head>
 
 <body>
@@ -18,12 +18,28 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            -webkit-touch-callout: none;
+            /* iOS Safari */
+            -webkit-user-select: none;
+            /* Safari */
+            -khtml-user-select: none;
+            /* Konqueror HTML */
+            -moz-user-select: none;
+            /* Old versions of Firefox */
+            -ms-user-select: none;
+            /* Internet Explorer/Edge */
+            user-select: none;
+            
         }
     </style>
     <h1>Click on document for open alert :D</h1>
-    <script >
+    <script>
+        var i = 0;
         document.addEventListener('click', function () {
-            window.fabAlert = new FabAlert();
+            i++;
+            new FabAlert({
+                title: 'Alerte ' + i,
+            });
         })
     </script>
 </body>
