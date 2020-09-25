@@ -3,7 +3,6 @@
 * http://fabalert.fabienwinkler.com
 * by Fabien Winkler.
 */
-
 @import '_animations';
 
 * {
@@ -18,6 +17,37 @@
     right: 5px;
     transition: all .5s ease;
     padding: .5rem;
+    width: auto;
+    height: fit-content;
+    max-width: 200px;
+    max-height: 50%;
+
+    &.center {
+        right: 0;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+    }
+
+    &.rightTop {
+        top: 5px;
+        bottom: unset;
+        left: unset;
+    }
+
+    &.leftBottom {
+        right: unset;
+        left: 5px;
+        top: unset;
+    }
+
+    &.leftTop {
+        right: unset;
+        left: 5px;
+        top: 5px;
+        bottom: unset;
+    }
 
     .fab-alert {
         padding: .6rem;
@@ -31,30 +61,50 @@
         align-items: center;
         background-color: rgba(170, 160, 159, 0.8);
         border-color: rgba(170, 160, 159, 0.8);
-        border-radius: 2px;
+        border-radius: 5px;
         transition: all .5s ease;
 
         &:last-child {
             margin-bottom: 0;
         }
 
-        &.rightTop {
-            top: 5px;
-            bottom: unset;
-            left: unset;
+        &.success {
+            background-color: #1cc468;
         }
 
-        &.leftBottom {
-            right: unset;
-            left: 5px;
-            top: unset;
+        &.info {
+            background-color: #29bbff;
         }
 
-        &.leftTop {
-            right: unset;
-            left: 5px;
-            top: 5px;
-            bottom: unset;
+        &.warning {
+            background-color: #fffbd0;
+            border: 1px solid #ffe0b7;
+            color: #e84b53;
+
+            .fab-alert-close {
+                &::after, &::before {
+                    background-color: #e84b53;
+                }
+            }
+        }
+
+        &.error {
+            background-color: #b92d2d;
+            color: #fefefe;
+
+            .fab-alert-close {
+
+                &::before,
+                &::after {
+                    background-color: #fefefe;
+                }
+            }
+        }
+
+        .fab-alert-icon {
+            margin-right: 1rem;
+            height: 30px;
+            width: 30px;
         }
 
         .fab-alert-body {

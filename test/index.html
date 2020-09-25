@@ -38,7 +38,9 @@
         document.addEventListener('click', function () {
             i++;
             new FabAlert({
-                title: 'Alerte ' + i,
+                type: 'Error',
+                autoClose: false,
+                type: 'warning'
             });
         })
     </script>

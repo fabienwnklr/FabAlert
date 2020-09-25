@@ -6,7 +6,7 @@ interface FabAlertOptions {
     message?: string;
     backgroundColor?: string;
     color?: string;
-    icon?: string;
+    icon?: string | boolean;
     iconText?: string;
     image?: string;
     balloon?: boolean;
@@ -14,6 +14,7 @@ interface FabAlertOptions {
     maxWidth?: null;
     zIndex?: null;
     close?: boolean;
+    autoClose?: boolean;
     closeOnEscape?: boolean;
     closeOnClick?: boolean;
     position?: string;
@@ -55,28 +56,32 @@ class FabAlert {
     $elClose: HTMLElement;
     /** @var $body window body element */
     $body: HTMLElement;
+    /** @var $icons svg icon available */
+    $icons: Object;
     /**
      * 
      * @param {Object} options Object with custom options
      */
     constructor(options?: FabAlertOptions) {
+
         const defaultOptions: FabAlertOptions = {
             id: `fab-alert-${new Date().getTime()}`,
             type: '',
             class: '',
-            title: 'Default',
-            message: 'This default alert...',
+            title: '',
+            message: '',
             backgroundColor: '',
             color: '',
-            icon: '',
+            icon: true,
             iconText: '',
             image: '',
             imageWidth: 50,
             maxWidth: null,
             zIndex: null,
             close: true,
+            autoClose: true,
             closeOnEscape: false,
-            closeOnClick: false,
+            closeOnClick: true,
             position: '',
             limitAlert: 3,
             drag: true,
@@ -85,8 +90,8 @@ class FabAlert {
             progressBar: true,
             timeoutProgress: 5000,
             progressBarColor: '',
-            transitionIn: 'fadeInUp', // bounceInLeft, bounceInRight, bounceInUp, bounceInDown, fadeIn, fadeInDown, fadeInUp, fadeInLeft, fadeInRight, flipInX
-            transitionOut: 'fadeOut', // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
+            transitionIn: 'bounceInLeft', // bounceInLeft, bounceInRight, bounceInUp, bounceInDown, fadeIn, fadeInDown, fadeInUp, fadeInLeft, fadeInRight, flipInX
+            transitionOut: 'fadeOutRight', // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
             transitionInMobile: 'fadeInUp',
             transitionOutMobile: 'fadeOutDown',
             onOpening: function () { },
@@ -94,6 +99,33 @@ class FabAlert {
             onClosing: function () { },
             onClosed: function () { },
         }
+
+        this.$icons = {
+            success: `
+            <svg viewBox="0 0 87 87" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                        <g id="Group-3" transform="translate(2.000000, 2.000000)">
+                            <circle id="Oval-2" stroke="rgba(165, 220, 134, 1)" stroke-width="4" cx="41.5" cy="41.5" r="41.5"></circle>
+                                <circle  class="ui-success-circle" id="Oval-2" stroke="rgba(165, 220, 134, 1)" stroke-width="4" cx="41.5" cy="41.5" r="41.5"></circle>
+                                <polyline class="ui-success-path" id="Path-2" stroke="rgba(165, 220, 134, 1)" stroke-width="4" points="19 38.8036813 31.1020744 54.8046875 63.299221 28"></polyline>
+                        </g>
+                </g>
+            </svg>`,
+            info: `
+            <svg id="icon-info" viewBox="0 0 32 32">
+                <title>info</title>
+                <path class="path1" d="M16 30.667c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667-6.58 14.667-14.667 14.667zM16 2.667c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
+                <path class="path2" d="M17.333 7.999c0 0.736-0.597 1.333-1.333 1.333s-1.333-0.597-1.333-1.333c0-0.736 0.597-1.333 1.333-1.333s1.333 0.597 1.333 1.333z"></path>
+                <path class="path3" d="M14.667 13.335c0-0.736 0.597-1.333 1.333-1.333v0c0.736 0 1.333 0.597 1.333 1.333v10.667c0 0.736-0.597 1.333-1.333 1.333v0c-0.736 0-1.333-0.597-1.333-1.333v-10.667z"></path>
+            </svg>`,
+            warning: `
+            <svg id="icon-warning" viewBox="0 0 32 32" fill="#e84b53">
+                <title>warning</title>
+                <path class="path1" d="M16 30.667c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667-6.58 14.667-14.667 14.667zM16 2.667c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
+                <path class="path2" d="M17.333 24.001c0 0.736-0.597 1.333-1.333 1.333s-1.333-0.597-1.333-1.333c0-0.736 0.597-1.333 1.333-1.333s1.333 0.597 1.333 1.333z"></path>
+                <path class="path3" d="M17.333 18.665c0 0.736-0.597 1.333-1.333 1.333v0c-0.736 0-1.333-0.597-1.333-1.333v-10.667c0-0.736 0.597-1.333 1.333-1.333v0c0.736 0 1.333 0.597 1.333 1.333v10.667z"></path>
+            </svg>`,
+        };
 
         if (!this._valueValid(options)) {
             this.options = defaultOptions;
@@ -137,6 +169,23 @@ class FabAlert {
             }
         }
     }
+
+    _manageDefaultContentByType() {
+        switch (this.options.type.toLowerCase()) {
+            case 'success':
+                this.options.title = 'Success';
+                break;
+            case 'info':
+                this.options.title = 'Info';
+                break;
+            case 'warning':
+                this.options.title = 'Warning';
+                break;
+            case 'error':
+                this.options.title = 'Error';
+                break;
+        }
+    }
     /** @utils end of utils function */
 
     init() {
@@ -150,7 +199,11 @@ class FabAlert {
      */
     createAlert() {
         if (!this._valueValid(this.options.title) && !this._valueValid(this.options.message)) {
-            throw new Error(`Please, alert need title or message ...`);
+            if (this._valueValid(this.options.type)) {
+                this._manageDefaultContentByType();
+            } else {
+                throw new Error(`Please, alert need title or message ...`);
+            }
         }
 
         if (document.querySelector('.fab-alert-container') === null) {
@@ -161,6 +214,13 @@ class FabAlert {
             this.$elContainer = document.querySelector('.fab-alert-container');
         }
 
+        if (this._valueValid(this.options.position)) {
+            this.$elContainer.classList.add(this.options.position);
+        }
+
+        if (this._valueValid(this.options.type)) {
+
+        }
 
         this.$el = document.createElement('div');
         this.$el.className = `fab-alert ${this.options.transitionIn}`;
@@ -170,54 +230,58 @@ class FabAlert {
             this.$el.classList.add(this.options.class);
         }
 
-        if (this._valueValid(this.options.position)) {
-            this.$el.classList.add(this.options.position);
+        if (this._valueValid(this.options.type)) {
+            this.$el.classList.add(this.options.type.toLowerCase());
         }
 
-        if (this._valueValid(this.options.type)) {
-            this.$el.classList.add(this.options.type);
-        }
-        
         this.$elBody = document.createElement('div');
         this.$elBody.className = 'fab-alert-body';
         this.$el.appendChild(this.$elBody);
-        
+
         if (this._valueValid(this.options.icon)) {
             this.$elIcon = document.createElement('span');
-            this.$elIcon.innerHTML = `
-            <svg id="successAnimation" class="animated" xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70">
-            <path id="successAnimationResult" fill="#D8D8D8" d="M35,60 C21.1928813,60 10,48.8071187 10,35 C10,21.1928813 21.1928813,10 35,10 C48.8071187,10 60,21.1928813 60,35 C60,48.8071187 48.8071187,60 35,60 Z M23.6332378,33.2260427 L22.3667622,34.7739573 L34.1433655,44.40936 L47.776114,27.6305926 L46.223886,26.3694074 L33.8566345,41.59064 L23.6332378,33.2260427 Z"/>
-            <circle id="successAnimationCircle" cx="35" cy="35" r="24" stroke="#979797" stroke-width="2" stroke-linecap="round" fill="transparent"/>
-            <polyline id="successAnimationCheck" stroke="#979797" stroke-width="2" points="23 34 34 43 47 27" fill="transparent"/>
-            </svg>`;
-            
+            this.$elIcon.className = `fab-alert-icon`;
+            this.$elIcon.innerHTML = this.$icons[this.options.type.toLowerCase()];
+
             if (this._valueValid(this.options.iconText)) {
                 this.$elIcon.title = this.options.iconText;
             }
+
+            this.$elBody.appendChild(this.$elIcon);
         }
-        
+
         if (this._valueValid(this.options.title)) {
             this.$elTitle = document.createElement('strong');
             this.$elTitle.className = 'fab-alert-title';
             this.$elTitle.innerHTML = this.options.title;
             this.$elBody.appendChild(this.$elTitle);
         }
-        
+
         if (this._valueValid(this.options.message)) {
             this.$elMsg = document.createElement('p');
             this.$elMsg.className = 'fab-alert-message';
             this.$elMsg.innerHTML = this.options.message;
             this.$elBody.appendChild(this.$elMsg);
         }
-        
+
         if (this._valueValid(this.options.close)) {
             this.$elClose = document.createElement('button');
             this.$elClose.className = 'fab-alert-close';
             this.$elClose.title = 'Close';
             this.$el.appendChild(this.$elClose);
         }
-        
+
         this.$elContainer.appendChild(this.$el);
+
+        if (this.options.autoClose === true) {
+            const _this = this;
+            let timerClose;
+
+            clearTimeout(timerClose);
+            timerClose = setTimeout(() => {
+                _this.close();
+            }, 5000);
+        }
     }
 
     /**
@@ -225,12 +289,23 @@ class FabAlert {
      */
     initEvents() {
         // Close event
-        this.$elClose.removeEventListener('click', this.close, true);
-        this.$elClose.addEventListener('click', this.close.bind(this), true);
+        if (this.options.close === true) {
+            this.$elClose.removeEventListener('click', this.close, true);
+            this.$elClose.addEventListener('click', this.close.bind(this), true);
+        }
 
-
+        // Close on click on alert
+        if (this.options.closeOnClick === true) {
+            this.$el.removeEventListener('click', this.close, true);
+            this.$el.addEventListener('click', this.close.bind(this), true);
+        }
     }
 
+    /**
+     * Function close alert
+     * @param event Event 
+     * @param elem elem to close if needed
+     */
     close(event?: Event, elem?: HTMLElement) {
         const that = this;
         event = event || window.event;
