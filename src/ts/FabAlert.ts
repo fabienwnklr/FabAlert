@@ -66,7 +66,7 @@ class FabAlert {
 
         const defaultOptions: FabAlertOptions = {
             id: `fab-alert-${new Date().getTime()}`,
-            type: '',
+            type: 'default',
             class: '',
             title: '',
             message: '',
@@ -102,14 +102,11 @@ class FabAlert {
 
         this.$icons = {
             success: `
-            <svg viewBox="0 0 87 87" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                        <g id="Group-3" transform="translate(2.000000, 2.000000)">
-                            <circle id="Oval-2" stroke="rgba(165, 220, 134, 1)" stroke-width="4" cx="41.5" cy="41.5" r="41.5"></circle>
-                                <circle  class="ui-success-circle" id="Oval-2" stroke="rgba(165, 220, 134, 1)" stroke-width="4" cx="41.5" cy="41.5" r="41.5"></circle>
-                                <polyline class="ui-success-path" id="Path-2" stroke="rgba(165, 220, 134, 1)" stroke-width="4" points="19 38.8036813 31.1020744 54.8046875 63.299221 28"></polyline>
-                        </g>
-                </g>
+            <svg id="icon-success" viewBox="0 0 32 32">
+                <title>success</title>
+                <path class="path1" d="M15.999 30.481c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667c0 8.088-6.58 14.667-14.667 14.667zM15.999 2.481c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
+                <path class="path2" d="M15.056 19.587c0.521 0.521 0.521 1.365 0 1.885v0c-0.521 0.521-1.365 0.521-1.885 0l-5.657-5.657c-0.521-0.521-0.521-1.365 0-1.885v0c0.521-0.521 1.365-0.521 1.885 0l5.657 5.657z"></path>
+                <path class="path3" d="M15.056 21.472c-0.521 0.521-1.365 0.521-1.885 0v0c-0.521-0.521-0.521-1.365 0-1.885l9.428-9.428c0.521-0.521 1.365-0.521 1.885 0v0c0.521 0.521 0.521 1.365 0 1.885l-9.428 9.428z"></path>
             </svg>`,
             info: `
             <svg id="icon-info" viewBox="0 0 32 32">
@@ -125,6 +122,13 @@ class FabAlert {
                 <path class="path2" d="M17.333 24.001c0 0.736-0.597 1.333-1.333 1.333s-1.333-0.597-1.333-1.333c0-0.736 0.597-1.333 1.333-1.333s1.333 0.597 1.333 1.333z"></path>
                 <path class="path3" d="M17.333 18.665c0 0.736-0.597 1.333-1.333 1.333v0c-0.736 0-1.333-0.597-1.333-1.333v-10.667c0-0.736 0.597-1.333 1.333-1.333v0c0.736 0 1.333 0.597 1.333 1.333v10.667z"></path>
             </svg>`,
+            error: `
+            <svg id="icon-error" viewBox="0 0 32 32">
+                <title>error</title>
+                <path class="path1" d="M16 30.667c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667-6.58 14.667-14.667 14.667zM16 2.667c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
+                <path class="path2" d="M22.6 20.715c0.521 0.521 0.521 1.365 0 1.885v0c-0.521 0.521-1.365 0.521-1.885 0l-11.313-11.313c-0.521-0.521-0.521-1.365 0-1.885v0c0.521-0.521 1.365-0.521 1.885 0l11.313 11.313z"></path>
+                <path class="path3" d="M20.715 9.4c0.521-0.521 1.365-0.521 1.885 0v0c0.521 0.521 0.521 1.365 0 1.885l-11.313 11.313c-0.521 0.521-1.365 0.521-1.885 0v0c-0.521-0.521-0.521-1.365 0-1.885l11.313-11.313z"></path>
+            </svg>`
         };
 
         if (!this._valueValid(options)) {
@@ -184,6 +188,9 @@ class FabAlert {
             case 'error':
                 this.options.title = 'Error';
                 break;
+            default:
+                this.options.title = 'Default';
+                break
         }
     }
     /** @utils end of utils function */
@@ -238,10 +245,10 @@ class FabAlert {
         this.$elBody.className = 'fab-alert-body';
         this.$el.appendChild(this.$elBody);
 
-        if (this._valueValid(this.options.icon)) {
+        if (this._valueValid(this.options.icon) && this._valueValid(this.$icons[this.options.type.toLowerCase()])) {
             this.$elIcon = document.createElement('span');
             this.$elIcon.className = `fab-alert-icon`;
-            this.$elIcon.innerHTML = this.$icons[this.options.type.toLowerCase()];
+            this.$elIcon.innerHTML = this.$icons[this.options.type.toLowerCase()] || this.options.icon;
 
             if (this._valueValid(this.options.iconText)) {
                 this.$elIcon.title = this.options.iconText;

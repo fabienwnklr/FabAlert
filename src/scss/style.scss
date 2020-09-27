@@ -3,6 +3,7 @@
 * http://fabalert.fabienwinkler.com
 * by Fabien Winkler.
 */
+@import 'variables';
 @import '_animations';
 
 * {
@@ -59,8 +60,8 @@
         // position: fixed;
         display: flex;
         align-items: center;
-        background-color: rgba(170, 160, 159, 0.8);
-        border-color: rgba(170, 160, 159, 0.8);
+        background-color: $color-default;
+        border: 1px solid $color-default;
         border-radius: 5px;
         transition: all .5s ease;
 
@@ -69,34 +70,70 @@
         }
 
         &.success {
-            background-color: #1cc468;
+            background-color: $color-success;
+            border-color: $text-success;
+            color : $text-success;
+
+            svg {
+                fill: $text-success;
+            }
+
+            .fab-alert-close {
+                &::before,
+                &::after {
+                    background-color: $text-success;
+                }
+            }
         }
 
         &.info {
-            background-color: #29bbff;
+            background-color: $color-info;
+            border-color: $text-info;
+            color: $text-info;
+
+            svg {
+                fill: $text-info;
+            }
+
+            .fab-alert-close {
+
+                &::after,
+                &::before {
+                    background-color: $text-info;
+                }
+            }
         }
 
         &.warning {
-            background-color: #fffbd0;
-            border: 1px solid #ffe0b7;
-            color: #e84b53;
+            background-color: $color-warning;
+            border-color: $text-warning;
+            color: $text-warning;
+
+            svg {
+                fill: $text-warning;
+            }
 
             .fab-alert-close {
                 &::after, &::before {
-                    background-color: #e84b53;
+                    background-color: $text-warning;
                 }
             }
         }
 
         &.error {
-            background-color: #b92d2d;
-            color: #fefefe;
+            background-color: $color-error;
+            color: $text-error;
+            border-color: $text-error;
+
+            svg {
+                fill: $text-error;
+            }
 
             .fab-alert-close {
 
                 &::before,
                 &::after {
-                    background-color: #fefefe;
+                    background-color: $text-error;
                 }
             }
         }
