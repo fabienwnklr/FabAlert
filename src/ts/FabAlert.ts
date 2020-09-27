@@ -48,16 +48,31 @@ class FabAlert {
     $elIcon: HTMLElement;
     /** @var $elTitle Title element of alert */
     $elTitle: HTMLElement;
-    /** @var $elBody Element body of alert */
+    /** @var $elBody Body element of alert */
     $elBody: HTMLElement;
-    /** @var $elMsg Element message of alert */
+    /** @var $elMsg  Message element of alert */
     $elMsg: HTMLElement;
-    /** @var $elClose Element close of alert */
+    /** @var $elClose  Close element of alert */
     $elClose: HTMLElement;
+    /** @var $elProgress  Progress element bar */
+    $elProgress: HTMLElement;
     /** @var $body window body element */
     $body: HTMLElement;
     /** @var $icons svg icon available */
     $icons: Object;
+    /**
+     * 
+     * @var Utils 
+     */
+    isPaused: boolean = false;
+    timerTimeout: number;
+    progressObj = {
+        hideEta: null as number,
+        maxHideTime: null as number,
+        currentTime: 0 as number,
+        el: null as HTMLElement,
+        updateProgress: null as Function
+    };
     /**
      * 
      * @param {Object} options Object with custom options
@@ -88,7 +103,7 @@ class FabAlert {
             balloon: false,
             pauseOnHover: true,
             progressBar: true,
-            timeoutProgress: 5000,
+            timeoutProgress: 3000,
             progressBarColor: '',
             transitionIn: 'bounceInLeft', // bounceInLeft, bounceInRight, bounceInUp, bounceInDown, fadeIn, fadeInDown, fadeInUp, fadeInLeft, fadeInRight, flipInX
             transitionOut: 'fadeOutRight', // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
@@ -174,6 +189,9 @@ class FabAlert {
         }
     }
 
+    /**
+     * Set default title for alert if not title setting
+     */
     _manageDefaultContentByType() {
         switch (this.options.type.toLowerCase()) {
             case 'success':
@@ -192,6 +210,17 @@ class FabAlert {
                 this.options.title = 'Default';
                 break
         }
+    }
+
+    _elementIsVisible(elem: HTMLElement) {
+        return !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
+    }
+
+    _checkValidNumber(val: Number) {
+        if (val && typeof val === 'number') {
+            return true;
+        }
+        return false;
     }
     /** @utils end of utils function */
 
@@ -213,7 +242,7 @@ class FabAlert {
             }
         }
 
-        if (document.querySelector('.fab-alert-container') === null) {
+        if (!this._valueValid(document.querySelector('.fab-alert-container'))) {
             this.$elContainer = document.createElement('div');
             this.$elContainer.className = `fab-alert-container`;
             this.$body.appendChild(this.$elContainer);
@@ -223,10 +252,6 @@ class FabAlert {
 
         if (this._valueValid(this.options.position)) {
             this.$elContainer.classList.add(this.options.position);
-        }
-
-        if (this._valueValid(this.options.type)) {
-
         }
 
         this.$el = document.createElement('div');
@@ -278,9 +303,20 @@ class FabAlert {
             this.$el.appendChild(this.$elClose);
         }
 
+        if (this.options.progressBar === true) {
+            this.$elProgress = document.createElement('div');
+            this.$elProgress.className = `fab-alert-progress`;
+
+            let div: HTMLElement = document.createElement('div');
+
+            this.$elProgress.appendChild(div);
+
+            this.$el.appendChild(this.$elProgress);
+        }
+
         this.$elContainer.appendChild(this.$el);
 
-        if (this.options.autoClose === true) {
+        if (this.options.autoClose === true && this.options.progressBar === false) {
             const _this = this;
             let timerClose;
 
@@ -306,6 +342,18 @@ class FabAlert {
             this.$el.removeEventListener('click', this.close, true);
             this.$el.addEventListener('click', this.close.bind(this), true);
         }
+
+        if (this.options.progressBar === true) {
+            this.startProgress();
+
+            if (this.options.pauseOnHover === true) {
+                this.$el.removeEventListener('mouseenter', this.pauseProgress, true);
+                this.$el.addEventListener('mouseenter', this.pauseProgress.bind(this));
+
+                this.$el.removeEventListener('mouseleave', this.resumeProgress, true);
+                this.$el.addEventListener('mouseleave', this.resumeProgress.bind(this));
+            }
+        }
     }
 
     /**
@@ -314,9 +362,13 @@ class FabAlert {
      * @param elem elem to close if needed
      */
     close(event?: Event, elem?: HTMLElement) {
-        const that = this;
+        if (this.timerTimeout && !  elem) {
+            clearInterval(this.timerTimeout);
+        }
+
         event = event || window.event;
         elem = elem || this.$el;
+
 
         if (event) {
             event.preventDefault();
@@ -337,5 +389,78 @@ class FabAlert {
         if (this.options.onClosed && typeof this.options.onClosed === 'function') {
             this.options.onClosed(this);
         }
+    }
+
+    /**
+     * 
+     * @param {Number} timer Timer for progress bar
+     */
+    startProgress(timer?: Number) {
+        if (!this._elementIsVisible(this.$el)) return;
+        if (!this.$elProgress) {
+            this.$elProgress = document.createElement('div');
+            let div: HTMLElement = document.createElement('div');
+
+            this.$elProgress.className = 'fab-modal-progress-bar';
+            this.$elProgress.appendChild(div);
+
+            this.$el.appendChild(this.$elProgress);
+
+            this.options.progressBar = true;
+        }
+
+        if (!this._checkValidNumber(timer) && !this._checkValidNumber(this.options.timeoutProgress)) {
+            throw new TypeError(`Please enter a valid number for progress timeout, actual value is : ${timer}`);
+        }
+
+        if (!this._valueValid(timer)) {
+            timer = this.options.timeoutProgress;
+        }
+
+        this.isPaused = false;
+        var _this = this;
+
+        if (this.options.progressBar === true) {
+
+            this.progressObj = {
+                hideEta: null,
+                maxHideTime: null,
+                currentTime: new Date().getTime(),
+                el: this.$el.querySelector('.fab-alert-progress > div'),
+                updateProgress: function updateProgress() {
+                    if (!_this.isPaused) {
+                        _this.progressObj.currentTime = _this.progressObj.currentTime + 10;
+
+                        var percentage = ((_this.progressObj.hideEta - (_this.progressObj.currentTime)) / _this.progressObj.maxHideTime) * 100;
+                        _this.progressObj.el.style.width = percentage + '%';
+                        if (percentage < 0) {
+                            _this.close();
+                        }
+                    }
+                }
+            };
+            if (timer > 0) {
+                this.progressObj.maxHideTime = Number(timer);
+                this.progressObj.hideEta = new Date().getTime() + this.progressObj.maxHideTime;
+                this.timerTimeout = setInterval(this.progressObj.updateProgress, 10);
+            }
+        }
+    }
+
+    pauseProgress() {
+        if (window.event) {
+            window.event.preventDefault();
+            window.event.stopPropagation();
+        }
+        this.isPaused = true;
+    }
+
+    resumeProgress() {
+        if (window.event) {
+            window.event.preventDefault();
+            window.event.stopPropagation();
+        }
+
+        this.isPaused = false;
     }
 }
