@@ -179,9 +179,15 @@ class FabAlert {
         if (currentAlert.length > 1) {
             for (let i = 0; i < currentAlert.length; i++) {
                 if (i !== currentAlert.length - 1) {
-                    if (currentAlert.length >= this.options.limitAlert && i === 0) {
-                        for (let j = 0; j < currentAlert.length - this.options.limitAlert; j++) {
-                            this.close(window.event, currentAlert[j]);
+                    if (currentAlert.length >= this.options.limitAlert) {
+                        if (this.options.position.toLowerCase().search('top') === -1) {
+                            for (let j = 0; j < currentAlert.length - this.options.limitAlert; j++) {
+                                this.close(window.event, currentAlert[j]);
+                            }
+                        } else {
+                            for (let j = currentAlert.length; j > this.options.limitAlert; j--) {
+                                this.close(window.event, currentAlert[j - 1]);
+                            }
                         }
                     }
                 }
@@ -227,7 +233,11 @@ class FabAlert {
     init() {
         this.createAlert();
         this.initEvents();
-        this._manageLimitAlert();
+        if (this._valueValid(this.options.limitAlert) && this._checkValidNumber(this.options.limitAlert)) {
+            this._manageLimitAlert();
+        } else {
+            this.$elContainer.style.maxHeight = '100%';
+        }
     }
 
     /**
@@ -252,6 +262,12 @@ class FabAlert {
 
         if (this._valueValid(this.options.position)) {
             this.$elContainer.classList.add(this.options.position);
+
+            // Gestion par défaut des transition selon la position
+            if (this.options.position.toLowerCase().search('left') !== - 1 && this.options.transitionIn.toLowerCase().search('left') !== -1) {
+                let transitionName = this.options.transitionIn.split('Left');
+                this.options.transitionIn = `${transitionName[0]}Right`;
+            }
         }
 
         this.$el = document.createElement('div');
@@ -314,7 +330,11 @@ class FabAlert {
             this.$el.appendChild(this.$elProgress);
         }
 
-        this.$elContainer.appendChild(this.$el);
+        if (this.options.position.toLowerCase().search('top') !== -1) {
+            this.$elContainer.prepend(this.$el);
+        } else {
+            this.$elContainer.appendChild(this.$el);
+        }
 
         if (this.options.autoClose === true && this.options.progressBar === false) {
             const _this = this;
@@ -362,7 +382,7 @@ class FabAlert {
      * @param elem elem to close if needed
      */
     close(event?: Event, elem?: HTMLElement) {
-        if (this.timerTimeout && !  elem) {
+        if (this.timerTimeout && !elem) {
             clearInterval(this.timerTimeout);
         }
 
