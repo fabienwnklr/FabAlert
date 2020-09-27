@@ -78,14 +78,6 @@
             svg {
                 fill: $text-success;
             }
-
-            .fab-alert-close {
-
-                &::before,
-                &::after {
-                    background-color: $text-success;
-                }
-            }
         }
 
         &.info {
@@ -95,14 +87,6 @@
 
             svg {
                 fill: $text-info;
-            }
-
-            .fab-alert-close {
-
-                &::after,
-                &::before {
-                    background-color: $text-info;
-                }
             }
         }
 
@@ -197,7 +181,7 @@
                 content: ' ';
                 height: 15px;
                 width: 2px;
-                background-color: #333;
+                background-color: currentColor;
                 top: 0;
             }
         }

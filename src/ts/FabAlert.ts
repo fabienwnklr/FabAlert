@@ -36,6 +36,7 @@ interface FabAlertOptions {
 }
 
 const log = (msg) => console.log(msg);
+const $ = (selector: string) : HTMLElement => document.querySelector(selector);
 
 class FabAlert {
     /** @var options cf : FabAlertOptions interface l.1 */
@@ -151,7 +152,7 @@ class FabAlert {
         } else {
             this.options = { ...defaultOptions, ...options };
         }
-        this.$body = document.querySelector('body');
+        this.$body = $('body');
 
         this.init();
     }
@@ -252,12 +253,12 @@ class FabAlert {
             }
         }
 
-        if (!this._valueValid(document.querySelector('.fab-alert-container'))) {
+        if (!this._valueValid($('.fab-alert-container'))) {
             this.$elContainer = document.createElement('div');
             this.$elContainer.className = `fab-alert-container`;
             this.$body.appendChild(this.$elContainer);
         } else {
-            this.$elContainer = document.querySelector('.fab-alert-container');
+            this.$elContainer = $('.fab-alert-container');
         }
 
         if (this._valueValid(this.options.position)) {
@@ -319,7 +320,7 @@ class FabAlert {
             this.$el.appendChild(this.$elClose);
         }
 
-        if (this.options.progressBar === true) {
+        if (this.options.progressBar === true && this.options.autoClose !== false) {
             this.$elProgress = document.createElement('div');
             this.$elProgress.className = `fab-alert-progress`;
 
@@ -334,6 +335,28 @@ class FabAlert {
             this.$elContainer.prepend(this.$el);
         } else {
             this.$elContainer.appendChild(this.$el);
+        }
+
+        // Color handle
+        if (this._valueValid(this.options.backgroundColor)) {
+            this.$el.style.backgroundColor = this.options.backgroundColor;
+        }
+
+        if (this._valueValid(this.options.color)) {
+            this.$el.style.color = this.options.color;
+            let icon = this.$elIcon.querySelector('svg');
+
+            if (icon !== null) {
+                icon.style.fill = this.options.color;
+            }
+
+            if (this.$elClose) {
+                let before = window.getComputedStyle(this.$elClose, '::before');
+                let after = window.getComputedStyle(this.$elClose, '::after');
+
+                // before.backgroundColor = this.options.color;
+                // after.backgroundColor = this.options.color;
+            }
         }
 
         if (this.options.autoClose === true && this.options.progressBar === false) {
@@ -363,7 +386,7 @@ class FabAlert {
             this.$el.addEventListener('click', this.close.bind(this), true);
         }
 
-        if (this.options.progressBar === true) {
+        if (this.options.progressBar === true && this.options.autoClose !== false) {
             this.startProgress();
 
             if (this.options.pauseOnHover === true) {

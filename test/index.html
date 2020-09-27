@@ -37,9 +37,12 @@
         var i = 0;
         document.addEventListener('click', function () {
             i++;
-            new FabAlert({
+            fabAlert = new FabAlert({
                 type: 'info',
-                position: 'rightTop'
+                limitAlert : 1,
+                // backgroundColor : 'red',
+                // color: 'black',
+                autoClose: false
             });
         })
     </script>
