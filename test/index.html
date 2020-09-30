@@ -11,6 +11,9 @@
 
 <body>
     <style>
+        :root {
+            --color: #923521;
+        }
         body {
             margin: 0;
             height: 100vh;
@@ -29,23 +32,34 @@
             -ms-user-select: none;
             /* Internet Explorer/Edge */
             user-select: none;
-            
+
+        }
+
+        button {
+            padding: 1rem;
+            margin: 1rem;
+            width: 100px;
         }
     </style>
-    <h1>Click on document for open alert :D</h1>
-    <script>
-        var i = 0;
-        document.addEventListener('click', function () {
-            i++;
-            fabAlert = new FabAlert({
-                type: 'info',
-                limitAlert : 1,
-                // backgroundColor : 'red',
-                // color: 'black',
-                autoClose: false
-            });
-        })
-    </script>
+    <button onclick="new FabAlert()">Default</button>
+    <button onclick="new FabAlert({
+        position: 'bottomLeft',
+        type: 'info',
+        limitAlert: 3,
+        autoClose: false,
+        maxWidth: 500,
+        message: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores vero excepturi facere cumque, at eum vitae ipsa praesentium repellendus! Doloremque corrupti sit facilis magnam vero soluta libero molestiae repellendus nostrum.'
+    })">Info</button>
+    <button onclick="new FabAlert({
+        type: 'warning',
+        position: 'topLeft'
+    })">Warning</button>
+    <button onclick="new FabAlert({
+        type: 'error',
+        position: 'topCenter',
+        transitionOut: 'flipOutX'
+    })">Error</button>
+    
 </body>
 
 </html>

@@ -9,11 +9,11 @@ interface FabAlertOptions {
     icon?: string | boolean;
     iconText?: string;
     image?: string;
-    balloon?: boolean;
     imageWidth?: number;
     maxWidth?: null;
     zIndex?: null;
     close?: boolean;
+    displayMode: number | string;
     autoClose?: boolean;
     closeOnEscape?: boolean;
     closeOnClick?: boolean;
@@ -36,7 +36,7 @@ interface FabAlertOptions {
 }
 
 const log = (msg) => console.log(msg);
-const $ = (selector: string) : HTMLElement => document.querySelector(selector);
+const $ = (selector: string): HTMLElement => document.querySelector(selector);
 
 class FabAlert {
     /** @var options cf : FabAlertOptions interface l.1 */
@@ -61,10 +61,18 @@ class FabAlert {
     $body: HTMLElement;
     /** @var $icons svg icon available */
     $icons: Object;
+    /** @var $utils Utils constante for dev ops */
     /**
      * 
      * @var Utils 
      */
+    utils = {
+        IS_MOBILE: false as boolean,
+        ACCEPTS_TOUCH: false as boolean,
+        POSITIONS: [] as Array<string>,
+        TRANSITION_IN: [] as Array<string>,
+        TRANSITION_OUT: [] as Array<string>
+    };
     isPaused: boolean = false;
     timerTimeout: number;
     progressObj = {
@@ -95,13 +103,13 @@ class FabAlert {
             maxWidth: null,
             zIndex: null,
             close: true,
+            displayMode: '', // Set limit alert to 1
             autoClose: true,
             closeOnEscape: false,
             closeOnClick: true,
-            position: '',
-            limitAlert: 3,
+            position: 'bottomRight',
+            limitAlert: 1,
             drag: true,
-            balloon: false,
             pauseOnHover: true,
             progressBar: true,
             timeoutProgress: 3000,
@@ -116,30 +124,38 @@ class FabAlert {
             onClosed: function () { },
         }
 
+        this.utils = {
+            IS_MOBILE: (/Mobi/.test(navigator.userAgent)) ? true : false,
+            ACCEPTS_TOUCH: 'ontouchstart' in document.documentElement,
+            POSITIONS: ['bottomRight', 'bottomLeft', 'bottomCenter', 'topRight', 'topLeft', 'topCenter', 'center'],
+            TRANSITION_IN: ['bounceInLeft', 'bounceInRight', 'bounceInUp', 'bounceInDown', 'fadeIn', 'fadeInDown', 'fadeInUp', 'fadeInLeft', 'fadeInRight', 'flipInX'],
+            TRANSITION_OUT: ['fadeOut', 'fadeOutUp', 'fadeOutDown', 'fadeOutLeft', 'fadeOutRight', 'flipOutX']
+        };
+        // Default icons
         this.$icons = {
             success: `
-            <svg id="icon-success" viewBox="0 0 32 32">
+            <svg id="icon-success" viewBox="0 0 32 32" width="30" height="30">
                 <title>success</title>
                 <path class="path1" d="M15.999 30.481c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667c0 8.088-6.58 14.667-14.667 14.667zM15.999 2.481c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
                 <path class="path2" d="M15.056 19.587c0.521 0.521 0.521 1.365 0 1.885v0c-0.521 0.521-1.365 0.521-1.885 0l-5.657-5.657c-0.521-0.521-0.521-1.365 0-1.885v0c0.521-0.521 1.365-0.521 1.885 0l5.657 5.657z"></path>
                 <path class="path3" d="M15.056 21.472c-0.521 0.521-1.365 0.521-1.885 0v0c-0.521-0.521-0.521-1.365 0-1.885l9.428-9.428c0.521-0.521 1.365-0.521 1.885 0v0c0.521 0.521 0.521 1.365 0 1.885l-9.428 9.428z"></path>
             </svg>`,
             info: `
-            <svg id="icon-info" viewBox="0 0 32 32">
+            <svg id="icon-info" viewBox="0 0 32 32" width="30" height="30">
                 <title>info</title>
                 <path class="path1" d="M16 30.667c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667-6.58 14.667-14.667 14.667zM16 2.667c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
                 <path class="path2" d="M17.333 7.999c0 0.736-0.597 1.333-1.333 1.333s-1.333-0.597-1.333-1.333c0-0.736 0.597-1.333 1.333-1.333s1.333 0.597 1.333 1.333z"></path>
                 <path class="path3" d="M14.667 13.335c0-0.736 0.597-1.333 1.333-1.333v0c0.736 0 1.333 0.597 1.333 1.333v10.667c0 0.736-0.597 1.333-1.333 1.333v0c-0.736 0-1.333-0.597-1.333-1.333v-10.667z"></path>
             </svg>`,
             warning: `
-            <svg id="icon-warning" viewBox="0 0 32 32" fill="#e84b53">
+            <svg id="icon-warning" viewBox="0 0 32 32" fill="#e84b53" width="30" height="30">
                 <title>warning</title>
                 <path class="path1" d="M16 30.667c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667-6.58 14.667-14.667 14.667zM16 2.667c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
                 <path class="path2" d="M17.333 24.001c0 0.736-0.597 1.333-1.333 1.333s-1.333-0.597-1.333-1.333c0-0.736 0.597-1.333 1.333-1.333s1.333 0.597 1.333 1.333z"></path>
                 <path class="path3" d="M17.333 18.665c0 0.736-0.597 1.333-1.333 1.333v0c-0.736 0-1.333-0.597-1.333-1.333v-10.667c0-0.736 0.597-1.333 1.333-1.333v0c0.736 0 1.333 0.597 1.333 1.333v10.667z"></path>
             </svg>`,
             error: `
-            <svg id="icon-error" viewBox="0 0 32 32">
+            <svg id="icon-error" viewBox="0 0 32 32" width="30" height="30">
                 <title>error</title>
                 <path class="path1" d="M16 30.667c-8.087 0-14.667-6.58-14.667-14.667s6.58-14.667 14.667-14.667 14.667 6.58 14.667 14.667-6.58 14.667-14.667 14.667zM16 2.667c-7.352 0-13.333 5.981-13.333 13.333s5.981 13.333 13.333 13.333c7.352 0 13.333-5.981 13.333-13.333s-5.981-13.333-13.333-13.333z"></path>
                 <path class="path2" d="M22.6 20.715c0.521 0.521 0.521 1.365 0 1.885v0c-0.521 0.521-1.365 0.521-1.885 0l-11.313-11.313c-0.521-0.521-0.521-1.365 0-1.885v0c0.521-0.521 1.365-0.521 1.885 0l11.313 11.313z"></path>
@@ -176,7 +192,7 @@ class FabAlert {
      * and remove the last alert if alert.length > 6
      */
     _manageLimitAlert() {
-        const currentAlert: NodeListOf<HTMLElement> = this.$body.querySelectorAll('.fab-alert');
+        const currentAlert: NodeListOf<HTMLElement> = this.$body.querySelectorAll(`.fab-alert-container.${this.options.position} .fab-alert`);
         if (currentAlert.length > 1) {
             for (let i = 0; i < currentAlert.length; i++) {
                 if (i !== currentAlert.length - 1) {
@@ -229,18 +245,36 @@ class FabAlert {
         }
         return false;
     }
-    /** @utils end of utils function */
 
-    init() {
-        this.createAlert();
-        this.initEvents();
-        if (this._valueValid(this.options.limitAlert) && this._checkValidNumber(this.options.limitAlert)) {
-            this._manageLimitAlert();
-        } else {
-            this.$elContainer.style.maxHeight = '100%';
+    _manageDisplayMode() {
+        if (this.options.displayMode === 1 || this.options.displayMode === 'once') {
+            if (document.querySelectorAll('.fab-alert').length > 0) {
+                return;
+            }
+        } else if (this.options.displayMode === 2 || this.options.displayMode === 'replace') {
+            this.options.limitAlert = 1;
         }
     }
 
+    _checkInUtils() {
+        if (!this.utils.POSITIONS.includes(this.options.position)) {
+            throw new Error(`Be careful, you're position setting it's not available, please check valable position : ${this.utils.POSITIONS.toString()}`)
+        } else if (!this.utils.TRANSITION_IN.includes(this.options.transitionIn)) {
+            throw new Error(`Be careful, you're transitionIn setting it's not available, please check valable transitionIn : ${this.utils.TRANSITION_IN.toString()}`)
+        } else if (!this.utils.TRANSITION_OUT.includes(this.options.transitionOut)) {
+            throw new Error(`Be careful, you're transitionOut setting it's not available, please check valable transitionOut : ${this.utils.TRANSITION_OUT.toString()}`)
+        }
+    }
+    /** @utils end of utils function */
+
+    init() {
+        // Check validity of params 
+        this._checkInUtils();
+        this._manageDisplayMode();
+        this.createAlert();
+        this.initEvents();
+        this._manageLimitAlert();
+    }
     /**
      * Function for create node element of alert
      */
@@ -253,21 +287,22 @@ class FabAlert {
             }
         }
 
-        if (!this._valueValid($('.fab-alert-container'))) {
+        if (!this._valueValid($(`.fab-alert-container.${this.options.position}`))) {
             this.$elContainer = document.createElement('div');
-            this.$elContainer.className = `fab-alert-container`;
+            this.$elContainer.className = `fab-alert-container ${this.options.position}`;
             this.$body.appendChild(this.$elContainer);
         } else {
-            this.$elContainer = $('.fab-alert-container');
+            this.$elContainer = $(`.fab-alert-container.${this.options.position}`);
         }
 
         if (this._valueValid(this.options.position)) {
-            this.$elContainer.classList.add(this.options.position);
-
             // Gestion par défaut des transition selon la position
+
             if (this.options.position.toLowerCase().search('left') !== - 1 && this.options.transitionIn.toLowerCase().search('left') !== -1) {
-                let transitionName = this.options.transitionIn.split('Left');
-                this.options.transitionIn = `${transitionName[0]}Right`;
+                const transitionInName = this.options.transitionIn.split('Left');
+                const transitionOutName = this.options.transitionOut.split('Right');
+                this.options.transitionIn = `${transitionInName[0]}Right`;
+                this.options.transitionOut = `${transitionOutName[0]}Left`;
             }
         }
 
@@ -281,6 +316,11 @@ class FabAlert {
 
         if (this._valueValid(this.options.type)) {
             this.$el.classList.add(this.options.type.toLowerCase());
+        }
+
+        if (this._valueValid(this.options.maxWidth)) {
+            this.$elContainer.style.maxWidth = `${this.options.maxWidth}px`;
+            this.$el.style.maxWidth = `${this.options.maxWidth}px`;
         }
 
         this.$elBody = document.createElement('div');

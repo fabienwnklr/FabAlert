@@ -14,14 +14,14 @@
     display: flex;
     flex-direction: column;
     position: fixed;
-    bottom: 0;
-    right: 5px;
     transition: all .5s ease;
     padding: .5rem;
     width: auto;
     height: fit-content;
-    max-width: 200px;
-    max-height: 50%;
+    max-width: 33%;
+    max-height: 100%;
+    min-width: 150px;
+    min-height: 60px;
 
     &.center {
         right: 0;
@@ -31,38 +31,60 @@
         margin: auto;
     }
 
-    &.rightTop {
-        top: 5px;
+    &.topRight {
+        top: 0;
+        right: 0;
         bottom: unset;
         left: unset;
     }
 
-    &.leftBottom {
+    &.bottomLeft {
         right: unset;
-        left: 5px;
+        left: 0;
+        top: unset;
+        bottom: 0;
+    }
+
+    &.topLeft {
+        right: unset;
+        left: 0;
+        top: 0;
+        bottom: unset;
+    }
+
+    &.bottomRight {
+        right: 0;
+        bottom: 0;
+        left: unset;
         top: unset;
     }
 
-    &.leftTop {
+    &.bottomCenter {
+        top: unset;
+        bottom: 0;
+        left: unset;
         right: unset;
-        left: 5px;
-        top: 5px;
+        margin: 0 auto;
+    }
+
+    &.topCenter {
+        top: 0;
         bottom: unset;
+        left: unset;
+        right: unset;
+        margin: 0 auto;
     }
 
     .fab-alert {
         padding: .6rem;
         width: 100%;
+        min-width: 150px;
         margin-bottom: .5rem;
-        // right: 5px;
         z-index: 99999;
-        // bottom: 5px;
-        // position: fixed;
-        box-shadow: .5rem .5rem 1rem rgba(0, 0, 0, .15) !important;
+        box-shadow: 0 0 0.5em rgba(0, 0, 0, .35);
         display: flex;
         align-items: center;
         background-color: $color-default;
-        // border: 1px solid $color-default;
         border-radius: 5px;
         transition: all .5s ease;
 
