@@ -46,7 +46,6 @@
         position: 'bottomLeft',
         type: 'info',
         limitAlert: 3,
-        autoClose: false,
         maxWidth: 500,
         message: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores vero excepturi facere cumque, at eum vitae ipsa praesentium repellendus! Doloremque corrupti sit facilis magnam vero soluta libero molestiae repellendus nostrum.'
     })">Info</button>
@@ -54,12 +53,18 @@
         type: 'warning',
         position: 'topLeft'
     })">Warning</button>
-    <button onclick="new FabAlert({
+    <button onclick="window.fabError = new FabAlert({
         type: 'error',
-        position: 'topCenter',
-        transitionOut: 'flipOutX'
+        position: 'topRight',
+        transitionOut: 'flipOutX',
+        autoClose: false,
+        onClosing: () => {console.log('She\'s closing')},
+        onClosed: () => {console.log('She\'s closed')}
     })">Error</button>
     
+    <script>
+        document.addEventListener('shown.fabAlert', (event) => console.log(event))
+    </script>
 </body>
 
 </html>

@@ -8,8 +8,6 @@ interface FabAlertOptions {
     color?: string;
     icon?: string | boolean;
     iconText?: string;
-    image?: string;
-    imageWidth?: number;
     maxWidth?: null;
     zIndex?: null;
     close?: boolean;
@@ -19,17 +17,16 @@ interface FabAlertOptions {
     closeOnClick?: boolean;
     position?: string;
     limitAlert?: number;
-    drag?: boolean;
     pauseOnHover?: boolean;
     progressBar?: boolean;
-    timeoutProgress?: number;
+    timeout?: number;
     progressBarColor?: string;
     transitionIn?: string, // 
     transitionOut?: string, // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
     transitionInMobile?: string,
     transitionOutMobile?: string,
-    onOpening?: Function;
-    onOpened?: Function;
+    onShow?: Function;
+    onHide?: Function;
     onClosing?: Function;
     onClosed?: Function;
 
@@ -71,7 +68,8 @@ class FabAlert {
         ACCEPTS_TOUCH: false as boolean,
         POSITIONS: [] as Array<string>,
         TRANSITION_IN: [] as Array<string>,
-        TRANSITION_OUT: [] as Array<string>
+        TRANSITION_OUT: [] as Array<string>,
+        IS_CHROME: false as boolean,
     };
     isPaused: boolean = false;
     timerTimeout: number;
@@ -98,8 +96,6 @@ class FabAlert {
             color: '',
             icon: true,
             iconText: '',
-            image: '',
-            imageWidth: 50,
             maxWidth: null,
             zIndex: null,
             close: true,
@@ -109,17 +105,16 @@ class FabAlert {
             closeOnClick: true,
             position: 'bottomRight',
             limitAlert: 1,
-            drag: true,
             pauseOnHover: true,
             progressBar: true,
-            timeoutProgress: 3000,
+            timeout: 3000,
             progressBarColor: '',
             transitionIn: 'bounceInLeft', // bounceInLeft, bounceInRight, bounceInUp, bounceInDown, fadeIn, fadeInDown, fadeInUp, fadeInLeft, fadeInRight, flipInX
             transitionOut: 'fadeOutRight', // fadeOut, fadeOutUp, fadeOutDown, fadeOutLeft, fadeOutRight, flipOutX
             transitionInMobile: 'fadeInUp',
             transitionOutMobile: 'fadeOutDown',
-            onOpening: function () { },
-            onOpened: function () { },
+            onShow: function () { },
+            onHide: function () { },
             onClosing: function () { },
             onClosed: function () { },
         }
@@ -129,7 +124,8 @@ class FabAlert {
             ACCEPTS_TOUCH: 'ontouchstart' in document.documentElement,
             POSITIONS: ['bottomRight', 'bottomLeft', 'bottomCenter', 'topRight', 'topLeft', 'topCenter', 'center'],
             TRANSITION_IN: ['bounceInLeft', 'bounceInRight', 'bounceInUp', 'bounceInDown', 'fadeIn', 'fadeInDown', 'fadeInUp', 'fadeInLeft', 'fadeInRight', 'flipInX'],
-            TRANSITION_OUT: ['fadeOut', 'fadeOutUp', 'fadeOutDown', 'fadeOutLeft', 'fadeOutRight', 'flipOutX']
+            TRANSITION_OUT: ['fadeOut', 'fadeOutUp', 'fadeOutDown', 'fadeOutLeft', 'fadeOutRight', 'flipOutX'],
+            IS_CHROME: /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor),
         };
         // Default icons
         this.$icons = {
@@ -178,10 +174,10 @@ class FabAlert {
     /**
      * Check if value existing, not undefined and not null
      * @param value value or multiple value to check
-     * @return boolean
+     * @return {boolean}
      */
-    _valueValid(value): boolean {
-        if (value && value !== '' && typeof value !== 'undefined' && value !== null) {
+    _valueValid(value): Boolean {
+        if (value !== '' && typeof value !== 'undefined' && value !== null) {
             return true;
         }
         return false;
@@ -235,11 +231,11 @@ class FabAlert {
         }
     }
 
-    _elementIsVisible(elem: HTMLElement) {
+    _elementIsVisible(elem: HTMLElement): Boolean {
         return !!(elem.offsetWidth || elem.offsetHeight || elem.getClientRects().length);
     }
 
-    _checkValidNumber(val: Number) {
+    _checkValidNumber(val: Number): Boolean {
         if (val && typeof val === 'number') {
             return true;
         }
@@ -261,7 +257,11 @@ class FabAlert {
             throw new Error(`Be careful, you're position setting it's not available, please check valable position : ${this.utils.POSITIONS.toString()}`)
         } else if (!this.utils.TRANSITION_IN.includes(this.options.transitionIn)) {
             throw new Error(`Be careful, you're transitionIn setting it's not available, please check valable transitionIn : ${this.utils.TRANSITION_IN.toString()}`)
+        } else if (!this.utils.TRANSITION_IN.includes(this.options.transitionInMobile)) {
+            throw new Error(`Be careful, you're transitionIn setting it's not available, please check valable transitionIn : ${this.utils.TRANSITION_IN.toString()}`)
         } else if (!this.utils.TRANSITION_OUT.includes(this.options.transitionOut)) {
+            throw new Error(`Be careful, you're transitionOut setting it's not available, please check valable transitionOut : ${this.utils.TRANSITION_OUT.toString()}`)
+        } else if (!this.utils.TRANSITION_OUT.includes(this.options.transitionOutMobile)) {
             throw new Error(`Be careful, you're transitionOut setting it's not available, please check valable transitionOut : ${this.utils.TRANSITION_OUT.toString()}`)
         }
     }
@@ -273,6 +273,7 @@ class FabAlert {
         this._manageDisplayMode();
         this.createAlert();
         this.initEvents();
+        this.show();
         this._manageLimitAlert();
     }
     /**
@@ -286,18 +287,8 @@ class FabAlert {
                 throw new Error(`Please, alert need title or message ...`);
             }
         }
-
-        if (!this._valueValid($(`.fab-alert-container.${this.options.position}`))) {
-            this.$elContainer = document.createElement('div');
-            this.$elContainer.className = `fab-alert-container ${this.options.position}`;
-            this.$body.appendChild(this.$elContainer);
-        } else {
-            this.$elContainer = $(`.fab-alert-container.${this.options.position}`);
-        }
-
+        // Adapt transition to position
         if (this._valueValid(this.options.position)) {
-            // Gestion par défaut des transition selon la position
-
             if (this.options.position.toLowerCase().search('left') !== - 1 && this.options.transitionIn.toLowerCase().search('left') !== -1) {
                 const transitionInName = this.options.transitionIn.split('Left');
                 const transitionOutName = this.options.transitionOut.split('Right');
@@ -305,9 +296,21 @@ class FabAlert {
                 this.options.transitionOut = `${transitionOutName[0]}Left`;
             }
         }
+        // End of adapt transition to position
 
+        // Container alert element
+        if (!this._valueValid($(`.fab-alert-container.${this.options.position}`))) {
+            this.$elContainer = document.createElement('div');
+            this.$elContainer.className = `fab-alert-container ${this.options.position}`;
+            this.$body.appendChild(this.$elContainer);
+        } else {
+            this.$elContainer = $(`.fab-alert-container.${this.options.position}`);
+        }
+        // End of container alert
+
+        // Alert element
         this.$el = document.createElement('div');
-        this.$el.className = `fab-alert ${this.options.transitionIn}`;
+        this.$el.className = `fab-alert hidden ${ this.utils.IS_MOBILE ? this.options.transitionInMobile :this.options.transitionIn}`;
         this.$el.id = this.options.id;
 
         if (this._valueValid(this.options.class)) {
@@ -323,6 +326,12 @@ class FabAlert {
             this.$el.style.maxWidth = `${this.options.maxWidth}px`;
         }
 
+        if (this._valueValid(this.options.zIndex) && this._checkValidNumber(Number(this.options.zIndex))) {
+            this.$el.style.zIndex = this.options.zIndex;
+        }
+        // End of element
+
+        // Body element
         this.$elBody = document.createElement('div');
         this.$elBody.className = 'fab-alert-body';
         this.$el.appendChild(this.$elBody);
@@ -338,44 +347,58 @@ class FabAlert {
 
             this.$elBody.appendChild(this.$elIcon);
         }
+        // End of body element
 
+        // Title element
         if (this._valueValid(this.options.title)) {
             this.$elTitle = document.createElement('strong');
             this.$elTitle.className = 'fab-alert-title';
             this.$elTitle.innerHTML = this.options.title;
             this.$elBody.appendChild(this.$elTitle);
         }
+        // End of title element
 
+        // Message element
         if (this._valueValid(this.options.message)) {
             this.$elMsg = document.createElement('p');
             this.$elMsg.className = 'fab-alert-message';
             this.$elMsg.innerHTML = this.options.message;
             this.$elBody.appendChild(this.$elMsg);
         }
+        // End of message element
 
+        // Close element
         if (this._valueValid(this.options.close)) {
             this.$elClose = document.createElement('button');
             this.$elClose.className = 'fab-alert-close';
             this.$elClose.title = 'Close';
             this.$el.appendChild(this.$elClose);
         }
+        // End of close element
 
-        if (this.options.progressBar === true && this.options.autoClose !== false) {
+        // Progress bar element
+        if (this.options.progressBar === true && this.options.autoClose === true) {
             this.$elProgress = document.createElement('div');
             this.$elProgress.className = `fab-alert-progress`;
 
             let div: HTMLElement = document.createElement('div');
 
+            if (this._valueValid(this.options.progressBarColor)) {
+                div.style.backgroundColor = this.options.progressBarColor;
+            }
             this.$elProgress.appendChild(div);
 
             this.$el.appendChild(this.$elProgress);
+
         }
 
+        // Adapt position container
         if (this.options.position.toLowerCase().search('top') !== -1) {
             this.$elContainer.prepend(this.$el);
         } else {
             this.$elContainer.appendChild(this.$el);
         }
+
 
         // Color handle
         if (this._valueValid(this.options.backgroundColor)) {
@@ -385,28 +408,9 @@ class FabAlert {
         if (this._valueValid(this.options.color)) {
             this.$el.style.color = this.options.color;
             let icon = this.$elIcon.querySelector('svg');
-
             if (icon !== null) {
                 icon.style.fill = this.options.color;
             }
-
-            if (this.$elClose) {
-                let before = window.getComputedStyle(this.$elClose, '::before');
-                let after = window.getComputedStyle(this.$elClose, '::after');
-
-                // before.backgroundColor = this.options.color;
-                // after.backgroundColor = this.options.color;
-            }
-        }
-
-        if (this.options.autoClose === true && this.options.progressBar === false) {
-            const _this = this;
-            let timerClose;
-
-            clearTimeout(timerClose);
-            timerClose = setTimeout(() => {
-                _this.close();
-            }, 5000);
         }
     }
 
@@ -426,16 +430,55 @@ class FabAlert {
             this.$el.addEventListener('click', this.close.bind(this), true);
         }
 
-        if (this.options.progressBar === true && this.options.autoClose !== false) {
+        if (this.options.progressBar === true && this.options.autoClose === true) {
             this.startProgress();
+        } else if (this.options.progressBar === false && (this.options.autoClose === true || (this._valueValid(this.options.timeout && this._checkValidNumber(Number(this.options.timeout)))))) {
+            this.startProgress(null, false);
+        }
 
-            if (this.options.pauseOnHover === true) {
-                this.$el.removeEventListener('mouseenter', this.pauseProgress, true);
-                this.$el.addEventListener('mouseenter', this.pauseProgress.bind(this));
+        if (this.options.pauseOnHover === true) {
+            this.$el.removeEventListener('mouseenter', this.pauseProgress, true);
+            this.$el.addEventListener('mouseenter', this.pauseProgress.bind(this));
 
-                this.$el.removeEventListener('mouseleave', this.resumeProgress, true);
-                this.$el.addEventListener('mouseleave', this.resumeProgress.bind(this));
-            }
+            this.$el.removeEventListener('mouseleave', this.resumeProgress, true);
+            this.$el.addEventListener('mouseleave', this.resumeProgress.bind(this));
+        }
+    }
+
+    show() {
+        if (this.utils.IS_MOBILE) {
+            this.$el.classList.remove(this.options.transitionOutMobile);
+            this.$el.classList.add(this.options.transitionInMobile);
+        } else {
+            this.$el.classList.remove(this.options.transitionOut);
+            this.$el.classList.add(this.options.transitionIn);
+        }
+
+        try {
+            const event = new CustomEvent('shown.fabAlert', { detail: this.options, bubbles: true, cancelable: true });
+            document.dispatchEvent(event);
+        } catch (error) {
+            console.warn(error);
+        }
+        if (this._valueValid(this.options.onShow) && typeof this.options.onShow === 'function') {
+            this.options.onShow(this);
+        }
+    }
+
+    hide() {
+        if (this.utils.IS_MOBILE) {
+            this.$el.classList.remove(this.options.transitionInMobile);
+            this.$el.classList.add(this.options.transitionOutMobile);
+        } else {
+            this.$el.classList.remove(this.options.transitionIn);    
+            this.$el.classList.add(this.options.transitionOut);
+        }
+
+        try {
+            const event = new CustomEvent('hidden.fabAlert', { detail: this.options, bubbles: true, cancelable: true });
+            document.dispatchEvent(event);
+        } catch (error) {
+            console.warn(error);
         }
     }
 
@@ -449,38 +492,45 @@ class FabAlert {
             clearInterval(this.timerTimeout);
         }
 
+        const _this = this;
         event = event || window.event;
         elem = elem || this.$el;
 
+        if (this._valueValid(this.options.onClosing) && typeof this.options.onClosing === 'function') {
+            this.options.onClosing(event, this);
+        }
 
         if (event) {
             event.preventDefault();
             event.stopPropagation();
         }
 
-        if (this.options.onClosing && typeof this.options.onClosing === 'function') {
-            this.options.onClosing(this);
+        if (this.utils.IS_MOBILE) {
+            elem.classList.remove(this.options.transitionInMobile);
+            elem.classList.add(this.options.transitionOutMobile);
+        } else {
+            elem.classList.remove(this.options.transitionIn);
+            elem.classList.add(this.options.transitionOut);
         }
 
-        elem.classList.remove(this.options.transitionIn);
-        elem.classList.add(this.options.transitionOut);
-
-        elem.addEventListener('animationend', function () {
+        elem.addEventListener('animationend', function (event) {
             this.remove();
-        })
-
-        if (this.options.onClosed && typeof this.options.onClosed === 'function') {
-            this.options.onClosed(this);
-        }
+            if (_this._valueValid(_this.options.onClosed) && typeof _this.options.onClosed === 'function') {
+                _this.options.onClosed(event, _this)
+            }
+        });
     }
+
 
     /**
      * 
      * @param {Number} timer Timer for progress bar
+     * @param {Boolean} showProgressBar For adding dif not exist progress bar
      */
-    startProgress(timer?: Number) {
+    startProgress(timer?: Number, showProgressBar?: Boolean) {
+        if (!this._valueValid(showProgressBar)) showProgressBar = true;
         if (!this._elementIsVisible(this.$el)) return;
-        if (!this.$elProgress) {
+        if (!this.$elProgress && showProgressBar) {
             this.$elProgress = document.createElement('div');
             let div: HTMLElement = document.createElement('div');
 
@@ -492,41 +542,38 @@ class FabAlert {
             this.options.progressBar = true;
         }
 
-        if (!this._checkValidNumber(timer) && !this._checkValidNumber(this.options.timeoutProgress)) {
+        if (!this._checkValidNumber(timer) && !this._checkValidNumber(this.options.timeout)) {
             throw new TypeError(`Please enter a valid number for progress timeout, actual value is : ${timer}`);
         }
 
         if (!this._valueValid(timer)) {
-            timer = this.options.timeoutProgress;
+            timer = this.options.timeout;
         }
 
         this.isPaused = false;
         var _this = this;
 
-        if (this.options.progressBar === true) {
+        this.progressObj = {
+            hideEta: null,
+            maxHideTime: null,
+            currentTime: new Date().getTime(),
+            el: this.$el.querySelector('.fab-alert-progress > div'),
+            updateProgress: function updateProgress() {
+                if (!_this.isPaused) {
+                    _this.progressObj.currentTime = _this.progressObj.currentTime + 10;
 
-            this.progressObj = {
-                hideEta: null,
-                maxHideTime: null,
-                currentTime: new Date().getTime(),
-                el: this.$el.querySelector('.fab-alert-progress > div'),
-                updateProgress: function updateProgress() {
-                    if (!_this.isPaused) {
-                        _this.progressObj.currentTime = _this.progressObj.currentTime + 10;
-
-                        var percentage = ((_this.progressObj.hideEta - (_this.progressObj.currentTime)) / _this.progressObj.maxHideTime) * 100;
-                        _this.progressObj.el.style.width = percentage + '%';
-                        if (percentage < 0) {
-                            _this.close();
-                        }
+                    var percentage = ((_this.progressObj.hideEta - (_this.progressObj.currentTime)) / _this.progressObj.maxHideTime) * 100;
+                    if (showProgressBar) _this.progressObj.el.style.width = percentage + '%';
+                    if (percentage < 0) {
+                        _this.close();
                     }
                 }
-            };
-            if (timer > 0) {
-                this.progressObj.maxHideTime = Number(timer);
-                this.progressObj.hideEta = new Date().getTime() + this.progressObj.maxHideTime;
-                this.timerTimeout = setInterval(this.progressObj.updateProgress, 10);
             }
+        };
+        if (timer > 0) {
+            this.progressObj.maxHideTime = Number(timer);
+            this.progressObj.hideEta = new Date().getTime() + this.progressObj.maxHideTime;
+            this.timerTimeout = setInterval(this.progressObj.updateProgress, 10);
         }
     }
 
