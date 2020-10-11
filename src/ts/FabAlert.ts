@@ -4,6 +4,7 @@ interface FabAlertOptions {
     class?: string;
     title?: string;
     message?: string;
+    overlay?: boolean;
     backgroundColor?: string;
     color?: string;
     icon?: string | boolean;
@@ -40,6 +41,8 @@ class FabAlert {
     options: FabAlertOptions;
     /** @var $elContainer Container for all alert */
     $elContainer: HTMLElement;
+    /** @var $overlay */
+    $overlay: HTMLElement;
     /** @var $el Alert element */
     $el: HTMLElement;
     /** @var $elIcon Icon element of alert */
@@ -92,6 +95,7 @@ class FabAlert {
             class: '',
             title: '',
             message: '',
+            overlay: false,
             backgroundColor: '',
             color: '',
             icon: true,
@@ -303,6 +307,13 @@ class FabAlert {
         }
         // End of adapt transition to position
 
+        // Overlay element
+        if (this.options.overlay === true) {
+            this.$overlay = document.createElement('div');
+            this.$overlay.className = 'fab-alert-overlay fadeIn';
+            this.$body.appendChild(this.$overlay);
+        }
+
         // Container alert element
         if (!this._valueValid($(`.fab-alert-container.${this.options.position}`))) {
             this.$elContainer = document.createElement('div');
@@ -317,6 +328,10 @@ class FabAlert {
         this.$el = document.createElement('div');
         this.$el.className = `fab-alert hidden ${ this.utils.IS_MOBILE ? this.options.transitionInMobile :this.options.transitionIn}`;
         this.$el.id = this.options.id;
+
+        if (this.options.closeOnClick === true) {
+            this.$el.style.cursor = 'pointer';
+        }
 
         if (this._valueValid(this.options.class)) {
             this.$el.classList.add(this.options.class);
@@ -526,6 +541,14 @@ class FabAlert {
             elem.classList.add(this.options.transitionOut);
         }
 
+        if (this.$overlay) {
+            this.$overlay.classList.remove('fadeIn');
+            this.$overlay.classList.add('fadeOut');
+
+            this.$overlay.addEventListener('animationend', function (event) {
+                this.remove();
+            })
+        }
         elem.addEventListener('animationend', function (event) {
             this.remove();
             if (_this._valueValid(_this.options.onClosed) && typeof _this.options.onClosed === 'function') {

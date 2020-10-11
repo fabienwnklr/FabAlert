@@ -14,7 +14,7 @@
         :root {
             --color: #923521;
         }
-        #main {
+        body {
             margin: 0;
             height: 100vh;
             background-color: #fff;
@@ -40,21 +40,15 @@
             margin: 1rem;
             width: 100px;
         }
-
-        #toto {
-            width: 100%;
-            height: 500px;
-        }
     </style>
-   <div id="main">
         <button onclick="new FabAlert()">Default</button>
         <button onclick="new FabAlert({
-                position: 'bottomLeft',
-                target: '#toto',
+                position: 'center',
                 type: 'info',
                 limitAlert: 3,
                 maxWidth: 500,
                 autoClose: false,
+                overlay: true,
                 message: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Maiores vero excepturi facere cumque, at eum vitae ipsa praesentium repellendus! Doloremque corrupti sit facilis magnam vero soluta libero molestiae repellendus nostrum.'
             })">Info</button>
         <button onclick="new FabAlert({
@@ -70,10 +64,6 @@
                 onClosing: () => {console.log('She\'s closing')},
                 onClosed: () => {console.log('She\'s closed')}
             })">Error</button>
-   </div>
-    <div id="toto">
-
-    </div>
     <script>
         document.addEventListener('shown.fabAlert', (event) => console.log(event))
     </script>

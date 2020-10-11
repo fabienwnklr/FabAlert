@@ -5,106 +5,104 @@
 */
 @import 'animation-variables';
 
-.fab-alert {
-    &.revealIn,
-    .revealIn {
-        -webkit-animation: fabA-revealIn $animation-time3 cubic-bezier(0.25, 1.6, 0.25, 1) both;
-        -moz-animation: fabA-revealIn $animation-time3 cubic-bezier(0.25, 1.6, 0.25, 1) both;
-        animation: fabA-revealIn $animation-time3 cubic-bezier(0.25, 1.6, 0.25, 1) both;
-    }
+.revealIn,
+.revealIn {
+    -webkit-animation: fabA-revealIn $animation-time3 cubic-bezier(0.25, 1.6, 0.25, 1) both;
+    -moz-animation: fabA-revealIn $animation-time3 cubic-bezier(0.25, 1.6, 0.25, 1) both;
+    animation: fabA-revealIn $animation-time3 cubic-bezier(0.25, 1.6, 0.25, 1) both;
+}
 
-    &.slideIn,
-    .slideIn {
-        -webkit-animation: fabA-slideIn $animation-time3 cubic-bezier(.16, .81, .32, 1) both;
-        -moz-animation: fabA-slideIn $animation-time3 cubic-bezier(.16, .81, .32, 1) both;
-        animation: fabA-slideIn $animation-time3 cubic-bezier(.16, .81, .32, 1) both;
-    }
+.slideIn,
+.slideIn {
+    -webkit-animation: fabA-slideIn $animation-time3 cubic-bezier(.16, .81, .32, 1) both;
+    -moz-animation: fabA-slideIn $animation-time3 cubic-bezier(.16, .81, .32, 1) both;
+    animation: fabA-slideIn $animation-time3 cubic-bezier(.16, .81, .32, 1) both;
+}
 
-    &.bounceInLeft {
-        -webkit-animation: fabA-bounceInLeft 0.7s ease-in-out both;
-        animation: fabA-bounceInLeft 0.7s ease-in-out both;
-    }
+.bounceInLeft {
+    -webkit-animation: fabA-bounceInLeft 0.7s ease-in-out both;
+    animation: fabA-bounceInLeft 0.7s ease-in-out both;
+}
 
-    &.bounceInRight {
-        -webkit-animation: fabA-bounceInRight $animation-time2 ease-in-out both;
-        animation: fabA-bounceInRight $animation-time2 ease-in-out both;
-    }
+.bounceInRight {
+    -webkit-animation: fabA-bounceInRight $animation-time2 ease-in-out both;
+    animation: fabA-bounceInRight $animation-time2 ease-in-out both;
+}
 
-    &.bounceInDown {
-        -webkit-animation: fabA-bounceInDown $animation-time1 ease-in-out both;
-        animation: fabA-bounceInDown $animation-time1 ease-in-out both;
-    }
+.bounceInDown {
+    -webkit-animation: fabA-bounceInDown $animation-time1 ease-in-out both;
+    animation: fabA-bounceInDown $animation-time1 ease-in-out both;
+}
 
-    &.bounceInUp {
-        -webkit-animation: fabA-bounceInUp $animation-time1 ease-in-out both;
-        animation: fabA-bounceInUp $animation-time1 ease-in-out both;
-    }
+.bounceInUp {
+    -webkit-animation: fabA-bounceInUp $animation-time1 ease-in-out both;
+    animation: fabA-bounceInUp $animation-time1 ease-in-out both;
+}
 
-    &.fadeIn,
-    .fadeIn {
-        -webkit-animation: fabA-fadeIn 0.5s ease both;
-        animation: fabA-fadeIn 0.5s ease both;
-    }
+.fadeIn,
+.fadeIn {
+    -webkit-animation: fabA-fadeIn 0.5s ease both;
+    animation: fabA-fadeIn 0.5s ease both;
+}
 
-    &.fadeInUp {
-        opacity: 0;
-        -webkit-transform: translate3d(0, 100%, 0);
-        transform: translate3d(0, 100%, 0);
-        -webkit-animation: fabA-fadeInUp $animation-time1 ease both;
-        animation: fabA-fadeInUp $animation-time1 ease both;
-    }
+.fadeInUp {
+    opacity: 0;
+    -webkit-transform: translate3d(0, 100%, 0);
+    transform: translate3d(0, 100%, 0);
+    -webkit-animation: fabA-fadeInUp $animation-time1 ease both;
+    animation: fabA-fadeInUp $animation-time1 ease both;
+}
 
-    &.fadeInDown {
-        -webkit-animation: fabA-fadeInDown $animation-time1 ease both;
-        animation: fabA-fadeInDown $animation-time1 ease both;
-    }
+.fadeInDown {
+    -webkit-animation: fabA-fadeInDown $animation-time1 ease both;
+    animation: fabA-fadeInDown $animation-time1 ease both;
+}
 
-    &.fadeInLeft {
-        -webkit-animation: fabA-fadeInLeft $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
-        animation: fabA-fadeInLeft $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
-    }
+.fadeInLeft {
+    -webkit-animation: fabA-fadeInLeft $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
+    animation: fabA-fadeInLeft $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
+}
 
-    &.fadeInRight {
-        -webkit-animation: fabA-fadeInRight $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
-        animation: fabA-fadeInRight $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
-    }
+.fadeInRight {
+    -webkit-animation: fabA-fadeInRight $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
+    animation: fabA-fadeInRight $animation-time2 cubic-bezier(.25, .8, .25, 1) both;
+}
 
-    &.flipInX {
-        -webkit-animation: fabA-flipInX $animation-time2 cubic-bezier(0.35, 0, 0.25, 1) both;
-        animation: fabA-flipInX $animation-time2 cubic-bezier(0.35, 0, 0.25, 1) both;
-    }
+.flipInX {
+    -webkit-animation: fabA-flipInX $animation-time2 cubic-bezier(0.35, 0, 0.25, 1) both;
+    animation: fabA-flipInX $animation-time2 cubic-bezier(0.35, 0, 0.25, 1) both;
+}
 
-    &.fadeOut {
-        -webkit-animation: fabA-fadeOut $animation-time1 ease both;
-        animation: fabA-fadeOut $animation-time1 ease both;
-    }
+.fadeOut {
+    -webkit-animation: fabA-fadeOut $animation-time1 ease both;
+    animation: fabA-fadeOut $animation-time1 ease both;
+}
 
-    &.fadeOutDown {
-        -webkit-animation: fabA-fadeOutDown $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
-        animation: fabA-fadeOutDown $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
-    }
+.fadeOutDown {
+    -webkit-animation: fabA-fadeOutDown $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
+    animation: fabA-fadeOutDown $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
+}
 
-    &.fadeOutUp {
-        -webkit-animation: fabA-fadeOutUp $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
-        animation: fabA-fadeOutUp $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
-    }
+.fadeOutUp {
+    -webkit-animation: fabA-fadeOutUp $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
+    animation: fabA-fadeOutUp $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
+}
 
-    &.fadeOutLeft {
-        -webkit-animation: fabA-fadeOutLeft 0.5s ease both;
-        animation: fabA-fadeOutLeft 0.5s ease both;
-    }
+.fadeOutLeft {
+    -webkit-animation: fabA-fadeOutLeft 0.5s ease both;
+    animation: fabA-fadeOutLeft 0.5s ease both;
+}
 
-    &.fadeOutRight {
-        -webkit-animation: fabA-fadeOutRight 0.5s ease both;
-        animation: fabA-fadeOutRight 0.5s ease both;
-    }
+.fadeOutRight {
+    -webkit-animation: fabA-fadeOutRight 0.5s ease both;
+    animation: fabA-fadeOutRight 0.5s ease both;
+}
 
-    &.flipOutX {
-        -webkit-backface-visibility: visible !important;
-        backface-visibility: visible !important;
-        -webkit-animation: fabA-flipOutX $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
-        animation: fabA-flipOutX $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
-    }
+.flipOutX {
+    -webkit-backface-visibility: visible !important;
+    backface-visibility: visible !important;
+    -webkit-animation: fabA-flipOutX $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
+    animation: fabA-flipOutX $animation-time1 cubic-bezier(0.4, 0.45, 0.15, 0.91) both;
 }
 
 
