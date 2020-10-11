@@ -166,6 +166,11 @@ class FabAlert {
         }
         this.$body = $('body');
 
+        // We reassign with biding for do not loose this context
+        this.close = this.close.bind(this);
+        this.resumeProgress = this.resumeProgress.bind(this);
+        this.pauseProgress = this.pauseProgress.bind(this);
+
         this.init();
     }
 
@@ -195,11 +200,11 @@ class FabAlert {
                     if (currentAlert.length >= this.options.limitAlert) {
                         if (this.options.position.toLowerCase().search('top') === -1) {
                             for (let j = 0; j < currentAlert.length - this.options.limitAlert; j++) {
-                                this.close(window.event, currentAlert[j]);
+                                this.close(null, currentAlert[j]);
                             }
                         } else {
                             for (let j = currentAlert.length; j > this.options.limitAlert; j--) {
-                                this.close(window.event, currentAlert[j - 1]);
+                                this.close(null, currentAlert[j - 1]);
                             }
                         }
                     }
@@ -421,13 +426,13 @@ class FabAlert {
         // Close event
         if (this.options.close === true) {
             this.$elClose.removeEventListener('click', this.close, true);
-            this.$elClose.addEventListener('click', this.close.bind(this), true);
+            this.$elClose.addEventListener('click', this.close, true);
         }
 
         // Close on click on alert
         if (this.options.closeOnClick === true) {
             this.$el.removeEventListener('click', this.close, true);
-            this.$el.addEventListener('click', this.close.bind(this), true);
+            this.$el.addEventListener('click', this.close, true);
         }
 
         if (this.options.progressBar === true && this.options.autoClose === true) {
@@ -438,10 +443,15 @@ class FabAlert {
 
         if (this.options.pauseOnHover === true) {
             this.$el.removeEventListener('mouseenter', this.pauseProgress, true);
-            this.$el.addEventListener('mouseenter', this.pauseProgress.bind(this));
+            this.$el.addEventListener('mouseenter', this.pauseProgress);
 
             this.$el.removeEventListener('mouseleave', this.resumeProgress, true);
-            this.$el.addEventListener('mouseleave', this.resumeProgress.bind(this));
+            this.$el.addEventListener('mouseleave', this.resumeProgress);
+        }
+
+        if (this.options.closeOnEscape === true) {
+            window.removeEventListener('keyup', this.close, true);
+            window.addEventListener('keyup', this.close);
         }
     }
 
@@ -487,14 +497,17 @@ class FabAlert {
      * @param event Event 
      * @param elem elem to close if needed
      */
-    close(event?: Event, elem?: HTMLElement) {
+    close(event?: MouseEvent | KeyboardEvent, elem?: HTMLElement) {
         if (this.timerTimeout && !elem) {
             clearInterval(this.timerTimeout);
         }
 
         const _this = this;
-        event = event || window.event;
         elem = elem || this.$el;
+
+        if (event instanceof KeyboardEvent && event.type === 'keyup' && event.key !== 'Escape') {
+            return;
+        }
 
         if (this._valueValid(this.options.onClosing) && typeof this.options.onClosing === 'function') {
             this.options.onClosing(event, this);
