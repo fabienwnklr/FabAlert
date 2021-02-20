@@ -45,7 +45,6 @@
         <button onclick="new FabAlert({
                 position: 'center',
                 type: 'info',
-                limitAlert: 3,
                 maxWidth: 500,
                 autoClose: false,
                 overlay: true,
@@ -53,6 +52,7 @@
             })">Info</button>
         <button onclick="new FabAlert({
                 type: 'warning',
+                limitAlert: 3,
                 position: 'topLeft'
             })">Warning</button>
         <button onclick="window.fabError = new FabAlert({

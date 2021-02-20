@@ -30,7 +30,6 @@ interface FabAlertOptions {
     onHide?: Function;
     onClosing?: Function;
     onClosed?: Function;
-
 }
 
 const log = (msg) => console.log(msg);
@@ -85,7 +84,7 @@ class FabAlert {
     };
     /**
      * 
-     * @param {Object} options Object with custom options
+     * @param {FabAlertOptions}
      */
     constructor(options?: FabAlertOptions) {
 
